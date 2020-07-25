@@ -10,13 +10,19 @@
 
 using namespace std;
 
+
 static int p = 0;
+
+map<string,int> watched;
+map<string,vector<string> movies_type;
+
 
 class MovieShow
 
 {
 
   char movieno[5], moviename[100], StartTime[5], EndingTime[5], from[100], to[100], seat[8][4][10];
+  string type;
 
 public:
 
@@ -42,7 +48,7 @@ void vline(char ch)
 
   for (int i=80;i>0;i--)
 
-  cout<<ch;
+    cout<<ch;
 
 }
 
@@ -54,9 +60,16 @@ void MovieShow::install()
 
   cin>>movie[p].movieno;
 
+  cout<<"Movie Type:";
+
+  cin>>movie[p].type;
+
+
   cout<<"\nEnter Movie's name: ";
 
   cin>>movie[p].moviename;
+
+  movies_type[type].push_back(movie[p].moviename);
 
   cout<<"\nStarting time: ";
 
@@ -102,7 +115,7 @@ void MovieShow::allotment()
 
     if(strcmp(movie[n].movieno, number)==0)
 
-    break;
+      break;
 
   }
 
@@ -126,7 +139,7 @@ void MovieShow::allotment()
 
     {
 
-    if (strcmp(movie[n].seat[seat/4][(seat%4)-1], "Empty")==0)
+      if (strcmp(movie[n].seat[seat/4][(seat%4)-1], "Empty")==0)
 
       {
 
@@ -134,29 +147,32 @@ void MovieShow::allotment()
 
         cin>>movie[n].seat[seat/4][(seat%4)-1];
 
+        watched[movie[n].type]++;
+
+
         break;
 
       }
 
-    else
+      else
 
-      cout<<"The seat no. is already reserved.\n";
-
-      }
-
-      }
-
-    if(n>p)
-
-    {
-
-      cout<<"Enter correct movie no.\n";
-
-      goto top;
+        cout<<"The seat no. is already reserved.\n";
 
     }
 
   }
+
+  if(n>p)
+
+  {
+
+    cout<<"Enter correct movie no.\n";
+
+    goto top;
+
+  }
+
+}
 
 
 void MovieShow::empty()
@@ -197,51 +213,51 @@ void MovieShow::show()
 
     if(strcmp(movie[n].movieno, number)==0)
 
-    break;
+      break;
 
   }
 
-while(n<=p)
-
-{
-
-  vline('*');
-
-  cout<<"\nMovie no: \t"<<movie[n].movieno
-
-  <<"\nMovie Name: \t"<<movie[n].moviename<<"\t\tStarting time: \t"
-
-  <<movie[n].StartTime<<"\tEnding time:"<<movie[n].EndingTime
-
-  <<"\nFrom: \t\t"<<movie[n].from<<"\t\tTo: \t\t"<<
-
-  movie[n].to<<"\n";
-
-  vline('*');
-
-  movie[0].position(n);
-
-  int MovieShow=1;
-
-  for (int i=0; i<8; i++)
+  while(n<=p)
 
   {
 
-    for(int j=0;j<4;j++)
+    vline('*');
+
+    cout<<"\nMovie no: \t"<<movie[n].movieno
+
+    <<"\nMovie Name: \t"<<movie[n].moviename<<"\t\tStarting time: \t"
+
+    <<movie[n].StartTime<<"\tEnding time:"<<movie[n].EndingTime
+
+    <<"\nFrom: \t\t"<<movie[n].from<<"\t\tTo: \t\t"<<
+
+    movie[n].to<<"\n";
+
+    vline('*');
+
+    movie[0].position(n);
+
+    int MovieShow=1;
+
+    for (int i=0; i<8; i++)
 
     {
 
-      MovieShow++;
+      for(int j=0;j<4;j++)
 
-      if(strcmp(movie[n].seat[i][j],"Empty")!=0)
+      {
 
-      cout<<"\nThe seat no "<<(MovieShow-1)<<" is reserved for "<<movie[n].seat[i][j]<<".";
+        MovieShow++;
+
+        if(strcmp(movie[n].seat[i][j],"Empty")!=0)
+
+          cout<<"\nThe seat no "<<(MovieShow-1)<<" is reserved for "<<movie[n].seat[i][j]<<".";
+
+      }
 
     }
 
-  }
-
-  break;
+    break;
 
   }
 
@@ -271,27 +287,7 @@ void MovieShow::position(int l)
 
       if(strcmp(movie[l].seat[i][j], "Empty")==0)
 
-        {
-
-          cout.width(5);
-
-          cout.fill(' ');
-
-          cout<<s<<".";
-
-          cout.width(10);
-
-          cout.fill(' ');
-
-          cout<<movie[l].seat[i][j];
-
-          t++;
-
-        }
-
-        else
-
-        {
+      {
 
         cout.width(5);
 
@@ -305,15 +301,35 @@ void MovieShow::position(int l)
 
         cout<<movie[l].seat[i][j];
 
-        }
+        t++;
+
+      }
+
+      else
+
+      {
+
+        cout.width(5);
+
+        cout.fill(' ');
+
+        cout<<s<<".";
+
+        cout.width(10);
+
+        cout.fill(' ');
+
+        cout<<movie[l].seat[i][j];
 
       }
 
     }
 
+  }
+
   cout<<"\n\nThere are "<<t<<" seats empty in this Movie No: "<<movie[l].movieno;
 
-  }
+}
 
 void MovieShow::avail()
 
@@ -334,7 +350,7 @@ void MovieShow::avail()
     <<"\t\tStarting time: \t"<<movie[n].StartTime<<"\tEnding Time: \t"
 
     <<movie[n].EndingTime
-<<"\nFrom: \t\t"<<movie[n].from<<"\t\tTo: \t\t\t"
+    <<"\nFrom: \t\t"<<movie[n].from<<"\t\tTo: \t\t\t"
 
     <<movie[n].to<<"\n";
 
@@ -348,69 +364,103 @@ void MovieShow::avail()
 
 }
 
+bool sort(pair<string,int> a,pair<string,int> b){
+  return a.second>b.second;
+}
+
+void recommended_movies(){
+
+  vector<pair<string,int>> a;
+
+  for(auto i:watched){
+
+    a.push_back(make_pair{i.first,i.second});
+
+  }
+
+  sort(a.begin(),a.end(),cmp);
+
+  cout<<"Your recommendation is :\n";
+
+  string temp = a[0].first;
+
+  for(auto i:movies_type[temp]){
+
+      cout<<i<<"\n";
+  }
+
+  return;
+}
+
 int main()
 
 {
 
-system("cls");
+  system("cls");
 
-int w;
+  int w;
 
-while(1)
+  while(1)
 
-{
+  {
 
     system("cls");
 
 
-  cout<<"\n\n\n\n\n";
+    cout<<"\n\n\n\n\n";
 
-  cout<<"\t\t\t1.Register a Movie\n\t\t\t"
+    cout<<"\t\t\t1.Register a Movie\n\t\t\t"
 
-  <<"2.Reservation\n\t\t\t"
+    <<"2.Reservation\n\t\t\t"
 
-  <<"3.Show\n\t\t\t"
+    <<"3.Show\n\t\t\t"
 
-  <<"4.Movies Available. \n\t\t\t"
+    <<"4.Movies Available. \n\t\t\t"
 
-  <<"5.Exit";
+    <<"5. Recommended Movies.\n\t\t\t"
 
-  cout<<"\n\t\t\tEnter your choice:-> ";
+    <<"6.Exit";
 
-  cin>>w;
+    cout<<"\n\t\t\tEnter your choice:-> ";
 
-  switch(w)
+    cin>>w;
 
-  {
+    switch(w)
 
-    case 1:  movie[p].install();
+    {
 
-      break;
-
-    case 2:  movie[p].allotment();
+      case 1:  movie[p].install();
 
       break;
 
-    case 3:  movie[p].show();
+      case 2:  movie[p].allotment();
 
       break;
 
-    case 4:  movie[p].avail();
+      case 3:  movie[p].show();
 
       break;
 
-    case 5:  exit(0);
+      case 4:  movie[p].avail();
+
+      break;
+
+      case 5: recommended_movies();
+
+      break;
+
+      case 5:  exit(0);
+
+
+    }
+
+    cout<<"\n\n\nPress any key to continue..";
+    getch();
 
 
   }
-	
-  cout<<"\n\n\nPress any key to continue..";
-  getch();
 
-
-}
-
-return 0;
+  return 0;
 
 }
 
